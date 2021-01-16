@@ -400,7 +400,7 @@ export class HTML5BackendImpl implements Backend {
 	}
 
 	public handleDragStart(e: DragEvent, sourceId: string): void {
-		
+
 		if (e.defaultPrevented) {
 			return
 		}
@@ -484,7 +484,7 @@ export class HTML5BackendImpl implements Backend {
 
 			// Now we are ready to publish the drag source.. or are we not?
 			const { captureDraggingState } = this.getCurrentSourcePreviewNodeOptions()
-			
+
 			if (!captureDraggingState) {
 				// Usually we want to publish it in the next tick so that browser
 				// is able to screenshot the current (not yet dragging) state.
@@ -617,16 +617,18 @@ export class HTML5BackendImpl implements Backend {
 		this.lastClientOffset = getEventClientOffset(e)
 
 		if (this.hoverUpdateTimer === null) {
-
-
 			this.hoverUpdateTimer = requestAnimationFrame(() => {
-
-				this.actions.hover(dragOverTargetIds || [], {
-					clientOffset: this.lastClientOffset,
-				})
+				try {
+					this.actions.hover(dragOverTargetIds || [], {
+						clientOffset: this.lastClientOffset,
+					})
+				} catch (e) {
+					// this is a bad hack
+					// silencing sporadic "Cannot call hover while not dragging" errors
+					console.debug('Caught error on :hover', e)
+				}
 
 				this.hoverUpdateTimer = null
-
 			})
 		}
 
